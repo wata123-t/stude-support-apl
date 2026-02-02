@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}結果表示{% endblock %}
+{% block content %}
+
+<div class="container">
+        <h1 class="h2 mt-4 mb-4"> <i class="bi bi-speedometer2 me-3 text-primary"></i>結果表示</h1>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<!-- 実績表示 & ダミーデータ生成 -->
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">実績表示 / データ操作</div>
+        
+        <div class="card-body">
+            <div class="row">
+                <!-- //////////////////////////////////////////////////////////////////// -->
+                <!-- 実績表示 -->
+                 <!-- //////////////////////////////////////////////////////////////////// -->
+               <div class="col-md-6 mb-4">
+                    <h5 class="card-title">実績表示</h5>
+                    <p class="text-muted small">直近の1カ月/1年の学習実績を表示します</p>
+                    <form action="/graph" method="POST" class="row g-2">
+                        <div class="col-6">
+                            <input type="text" name="user_name_graph" class="form-control form-control-sm" placeholder="ユーザー名" required>
+                        </div>
+                        <div class="col-4">
+                            <select name="disp_term_graph" class="form-select form-select-sm">
+                                <option value="month">直近1ヶ月</option>
+                                <option value="year">直近1年</option>
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-outline-success btn-sm w-100">表示</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- //////////////////////////////////////////////////////////////////// -->
+                <!-- ユーザー別投稿一覧 -->
+                <!-- //////////////////////////////////////////////////////////////////// -->
+                <div class="col-md-6 mb-4">
+                     <h5 class="card-title">ユーザー別投稿一覧</h5>
+                     <p class="text-muted small">指定したユーザーの全投稿内容を表示します</p>
+                     <form action="/post_list" method="POST" class="row g-2">
+                         <div class="col-6"><input type="text" name="user_name_plist" class="form-control form-control-sm" placeholder="ユーザー名" required></div>
+                         <div class="col-4"><button type="submit" class="btn btn-outline-secondary btn-sm w-100">一覧を表示</button></div>
+                     </form>
+                </div>
+                <!-- //////////////////////////////////////////////////////////////////// -->
+            </div>
+        </div>
+    </div>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<!-- 参考情報の一覧 -->
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-book me-2"></i>参考情報の一覧</span>
+        <!-- カテゴリー絞り込みフォーム -->
+        <form action="/dashboard" method="GET" class="d-flex align-items-center mb-0">
+            <!-- -----カテゴリー選択---------- -->
+            <select name="category_id" class="form-select form-select-sm me-2" style="width: auto;" onchange="this.form.submit()">
+                <option value="">すべてのカテゴリー</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if cat.id == selected_category_id %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <!-- -----おすすめ度 最小値選択---------- -->
+            <select name="min_rating" class="form-select form-select-sm me-2" style="width: auto;" onchange="this.form.submit()">
+                {% for i in range(1, 6) %} <!-- 1から5まで -->
+                <option value="{{ i }}" {% if i == selected_min_rating|int %}selected{% endif %}>
+                    ★{{ i }} 以上
+                </option>
+                {% endfor %}
+            </select>
+            <!-- ------------------------------------ -->
+        </form>
+    </div>
+    
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>タイトル</th>
+                        <th>URL</th>
+                        <th>関連カテゴリ</th>
+                        <th>おすすめ度</th>
+                        <th>関連投稿</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ref in references %}
+                    <tr>
+                        <td><strong>{{ ref.title }}</strong></td>
+                        <td>
+                            {% if ref.url %}
+                            <a href="{{ ref.url }}" target="_blank" class="btn btn-sm btn-link p-0 text-truncate" style="max-width: 200px;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>リンクを開く
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ref.category %}
+                            <span class="badge bg-info text-dark">{{ ref.category.name }}</span>
+                            {% else %}
+                            <span class="text-muted">未分類</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="text-warning">
+                                {% if ref.rating %}
+                                    {% for i in range(ref.rating) %}★{% endfor %}
+                                    <small class="text-muted">({{ ref.rating }})</small>
+                                {% else %}
+                                    <span class="text-muted">未設定</span>
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ ref.post.title }}</small>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">該当する参考情報が見つかりません。</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+ 
+</div>
+
+{% endblock %}

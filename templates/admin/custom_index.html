@@ -1,0 +1,12 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+
+    <p>システム全体の概要を表示しています。</p>
+    <ul>
+        <li>総ユーザー数: <strong>{{ total_users }}</strong>人</li>
+        <li>総学習記録数: <strong>{{ total_records }}</strong>件</li>
+    </ul>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">ホーム</a>
+    <!-- 他の統計情報やアラートなどをここに追加 -->
+{% endblock %}
+

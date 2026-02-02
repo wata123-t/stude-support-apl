@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}ログインページ{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center">ログイン</h3>
+                    <!-- フラッシュメッセージの表示 -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <!-- Bootstrapのアラートスタイルを使用 -->
+                          <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">ユーザ名</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="ユーザ名" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">パスワード</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="パスワード" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="submit" class="btn btn-primary w-100" value="ログイン">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

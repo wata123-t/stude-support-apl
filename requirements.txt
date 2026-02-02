@@ -1,0 +1,12 @@
+psycopg[binary]==3.1.18
+Flask-SQLAlchemy==3.1.1
+flask>=3.0.0
+sqlalchemy>=2.0.0
+pytest
+pytest-flask
+python-dateutil
+freezegun
+flask-migrate
+flask-login
+flask-apscheduler
+flask-admin

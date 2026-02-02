@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}学習記録の詳細{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="mb-4">学習記録の詳細</h2>
+    </div>
+
+    <!-- -------------------------------------------------------- メインカードの開始-------------------------------------------------------- -->
+    <div class="card mb-4 shadow-sm" id="post-{{ post.id }}">
+        
+        <!--  ---------------------------------●1. ヘッダー（タイトルと日付） --------------------------------- -->
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-primary">{{ post.title }}</h5>
+            <small class="text-muted">{{ post.created_at.strftime('%Y/%m/%d %H:%M') }}</small>
+        </div>
+        
+        {# 開発者用コメントアウト #}
+        <!--  --------------------------------- ●ボディー(start)------------------------------------------------------ -->
+        <!--  --------------------------------- ●メイン情報     ------------------------------------------------------ -->
+        <!--  --------------------------------- ●投稿内容やリンクアクション--------------------------------------------- -->
+       <div class="card-body">
+            <!-- ------------(2. 学習のメモ内容)------------ -->
+            <p class="card-text" style="white-space: pre-wrap;">{{ post.content }}</p>
+            
+            <!-- ------------(3. 学習カテゴリーと時間)------------ -->
+            <div class="mb-3">
+                {% for detail in post.details %}
+                <span class="badge bg-primary rounded-pill p-2">
+                    {{ detail.category.name }}: {{ detail.duration_minutes }}分
+                </span>
+                {% endfor %}
+            </div>
+
+            <!-- ------------(4. 参照データセクション)------------ -->
+            {% if post.references %}
+            <div class="mt-3 p-3 bg-light rounded">
+                <h6 class="fw-bold border-bottom pb-2">📚 参照資料</h6>
+                {% for ref in post.references %}
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <strong>
+                            {% if ref.url %}
+                                <a href="{{ ref.url }}" target="_blank">{{ ref.title }}</a>
+                            {% else %}
+                                {{ ref.title }}
+                            {% endif %}
+                        </strong>
+                        <span class="text-warning">
+                            {{ '★' * ref.rating }}{{ '☆' * (5 - ref.rating) }}
+                        </span>
+                    </div>
+                    
+                    <div class="mt-1">
+                                     {% if ref.category %}
+                                         <small class="text-muted">#{{ ref.category.name }}</small>
+                                     {% else %}
+                                         <!-- --------カテゴリが保存されていない場合に備えて（デバッグ用） -->
+                                         <small class="text-muted text-danger">#カテゴリなし</small>
+                                     {% endif %}
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        <!-- ------------(5. 編集・削除ボタン)------------ -->
+        <div class="d-flex justify-content-end mt-4 gap-2">
+            {% if current_user.is_authenticated and current_user.id == post.user_id %}
+                <!--  ------------- ★★★python 処理指定 ★★★----編集は、GET 処理のみ -------------------------------- -->
+                <a href="/{{ post.id }}/update" class="btn btn-success btn-sm me-2">編集</a>
+                <!--  ------------- ★★★python 処理指定 ★★★------削除は POST 処理が必要 ------------------------------ -->
+                <form action="/{{ post.id }}/delete" method="POST" onsubmit="return confirm('本当にこの投稿を削除しますか？');">
+                    <button type="submit" class="btn btn-danger btn-sm">削除</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <!--  --------------------------------- ●ボディー(end)------------------------------------------------------ -->
+
+        <!--  --------------------------------- ●フッターー------------------------------------------------------ -->
+        <!--  --------------------------------- ●リアクション情報-------------------------------------------------- -->
+        <!-- 6. いいね機能（フッター1） -->
+
+        <div class="card-footer bg-white border-top-0">
+            <button class="btn btn-outline-danger btn-sm like-button" 
+                    data-post-id="{{ post.id }}"
+                    id="like-btn-{{ post.id }}">
+                <i class="bi {% if current_user.id in post.likes|map(attribute='user_id') %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                <span class="like-count">{{ post.likes.count() }}</span>
+            </button>
+        </div>
+
+        <!-- 7. コメントエリア（フッター2） -->
+        <div class="card-footer bg-light border-top">
+            <h6 class="border-bottom pb-2">コメント ({{ post.comments.count() }})</h6>
+            {% if post.comments %}
+                {% for comment in post.comments %}
+                <div class="mb-2 p-2 bg-white border rounded">
+                    <small class="text-primary fw-bold">{{ comment.author.username }}</small>
+                    <p class="mb-0">{{ comment.content }}</p>
+                    <small class="text-muted d-block text-end">{{ comment.created_at.strftime('%Y/%m/%d %H:%M') }}</small>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p><small class="text-muted">まだコメントはありません。</small></p>
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+            <!--  ------------- ★★★python 処理指定 ★★★------------------------------------ -->
+            <form action="/{{ post.id }}/comment" method="POST" class="mt-3">
+                <div class="input-group">
+                    <input type="text" name="content" class="form-control form-control-sm" placeholder="コメントを入力...">
+                    <button class="btn btn-primary btn-sm" type="submit">投稿</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- 8. 投稿者情報（フッター3） -->
+        <div class="card-footer bg-transparent text-end border-0">
+            <small class="text-muted">投稿者 : {{ post.author.username }}</small>
+        </div>
+    </div>
+    <!-- -------------------------------------------------------- メインカードの終了-------------------------------------------------------- -->
+</div>
+<script src="{{ url_for('static', filename='js/readmore.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習統計ダッシュボード</title>
+    <!-- Chart.js CDNを読み込む -->
+
+    <!-- ここにBootstrap CSS CDNを追加 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <style>
+        .chart-container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        canvas {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- デバッグ設定-->
+    <!-- <pre>{{ data | tojson }}</pre>-->
+<div style="width: 80%; margin: 20px auto;">
+    <a href="{{ url_for('index') }}" style="text-decoration: none; color: #4b6cb7; font-weight: bold;">← メニューへ戻る</a>
+</div>
+   <h1>学習統計</h1>
+    <p>表示期間: {{ term }} (直近{{ "1年間" if term == "year" else "30日間" }})</p>
+
+    <!-- 棒グラフ描画エリア -->
+    <div class="chart-container">
+        <h2>期間別学習時間 (時間)</h2>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <!-- 円グラフ描画エリア -->
+    <div class="chart-container" style="width: 50%;">
+        <h2>カテゴリー別学習時間 (分)</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- JavaScriptでグラフを描画するスクリプト -->
+    <script>
+        // Flaskから渡されたデータをJavaScript変数として取得
+        const chartData = {{ data | tojson }};
+
+        // 棒グラフの設定と描画
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: chartData.bar_labels, // X軸ラベル (日付/月)
+                datasets: [{
+                    label: '学習時間 (時間)',
+                    data: chartData.bar_values, // Y軸データ (時間)
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '時間'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 円グラフの設定と描画
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        // ランダムな色を生成するヘルパー関数
+        function generateColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(`hsl(${i * 60 % 360}, 70%, 60%)`);
+            }
+            return colors;
+        }
+        const backgroundColors = generateColors(chartData.pie_labels.length);
+
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: chartData.pie_labels, // カテゴリー名
+                datasets: [{
+                    data: chartData.pie_values, // データ (分)
+                    backgroundColor: backgroundColors,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '分';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}学習記録の修正{% endblock %}
+{% block content %}
+
+    <div class="container mt-5">
+        <h1 class="mb-4">投稿編集</h1>
+
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 学習カテゴリと時間 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+        <!-- フォームアクション(Python)---------------------------- -->
+        <form method="POST" action="/{{ post.id }}/update">
+            
+            <!-- 基本情報（タイトル、内容） -->
+            <div class="mb-3">
+                <label for="title" class="form-label">タイトル:</label>
+                <input type="text" id="title" name="title" value="{{ post.title }}" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="content" class="form-label">学習内容:</label>
+                <textarea id="content" name="content" rows="5" class="form-control">{{ post.content }}</textarea>
+            </div>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 学習カテゴリと時間 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+            <h3 class="mt-4 mb-3">学習時間 (カテゴリと分数)</h3>
+            <div id="category-area">
+                {% for detail in post.details %}
+                <div class="row mb-2 category-item">
+                    <div class="col-md-5">
+                        <select name="category_id[]" class="form-select" required>
+                            {% for cat in all_categories %}
+                            <option value="{{ cat.id }}" {% if cat.id == detail.category_id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="number" name="duration[]" value="{{ detail.duration_minutes }}" placeholder="分" class="form-control" required min="1">
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn btn-danger">削除</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 参照データ -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+            <h3 class="mt-4 mb-3">参照データ</h3>
+            <div id="reference-area">
+                {% for ref in post.references %}
+                <div class="mb-4 p-3 border rounded bg-light ref-item">
+                    <div class="row g-2">
+                        <div class="col-md-10">
+                            <input type="text" name="ref_title[]" value="{{ ref.title }}" placeholder="タイトル" class="form-control" required>
+                        </div>
+                        <div class="col-md-2 d-grid">
+                             <button type="button" onclick="this.closest('.ref-item').remove()" class="btn btn-danger">削除</button>
+                        </div>
+                    </div>
+                    <!-- //////////////////////////////////////////////////////////////////////////////////////-->
+                   <div class="row g-2 mt-1">
+                        <div class="col-md-8">
+                            <input type="url" name="ref_url[]" value="{{ ref.url }}" placeholder="URL" class="form-control">
+                        </div>
+                        <!-- //////////////////////////////////////////////////////////////////////////////////////-->
+                        <div class="col-md-4">
+                            <label class="form-label small mb-1">おすすめ度</label>
+                            <select name="ref_rating[]" class="form-select form-select-sm">
+                                <option value="">評価なし</option>
+                                {% for i in range(5, 0, -1) %}
+                                <option value="{{ i }}" {% if ref.rating == i %}selected{% endif %}>
+                                    {{ '★' * i }}{{ '☆' * (5 - i) }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                   <!-- //////////////////////////////////////////////////////////////////////////////////////-->
+                    <!-- カテゴリー選択------------------------------------------- -->
+                    <div class="mt-2">
+                        <label class="form-label mb-1">関連カテゴリ:</label>
+                        <select name="ref_category[]" class="form-select form-select-sm">
+                            <option value="">カテゴリなし</option>
+                            {% for cat in all_categories %}
+                                <option value="{{ cat.id }}" {% if ref.category_id == cat.id %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- //////////////////////////////////////////////////////////////////////////////////////-->
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">更新保存</button>
+                <a href="{{ url_for('index') }}" class="btn btn-link">キャンセル</a>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
+<!--    ////////////////////////////////////////////////////////////////       -->
+

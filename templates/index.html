@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}記録一覧{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="mb-4">学習記録タイムライン</h2>
+        {% if current_user.is_authenticated %}
+            <a href="/create_post" role="button" class="btn btn-info">新規投稿</a>
+        {% endif %}
+    </div>
+   <!-- //////////////////////////////////////////////////////////////////////////////////////////// -->
+   <!-- 投稿記事の表示 -->
+   <!-- //////////////////////////////////////////////////////////////////////////////////////////// -->
+    {% if posts %}
+           {% for post in posts %}
+           <div class="card mb-4 shadow-sm">
+                   <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                           <h5 class="mb-0">
+                               <a href="/{{ post.id }}/readmore">
+                                   {{ post.title }}
+                               </a>
+                           </h5>
+                           <small class="text-muted">投稿者 : {{ post.author.username }}</small>
+                           <small class="text-muted">{{ post.created_at.strftime('%Y/%m/%d %H:%M') }}</small>
+                   </div>
+                   <div class="card-body">
+                           <p class="card-text">{{ post.content | truncate(50, True, '...') }}</p>
+                   </div>
+           </div>
+           {% endfor %}
+    {% else %}
+        <div class="alert alert-info">まだ学習記録がありません。</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}学習実績の記録{% endblock %}
+{% block content %}
+
+<div class="container">
+    <h1 class="h2 mt-4 mb-4"> 学習実績の記録</h1>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 学習日と詳細内容 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+   <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/create_post">
+                <div class="mb-3">
+                    <label for="title" class="form-label">学習日とタイトル</label>
+                    <input type="text" id="title" name="title" class="form-control" 
+                           placeholder="例: 2026年1月1日の学習" required>
+                </div>
+              <div class="mb-3">
+                  <label for="content" class="form-label">詳細内容</label>
+                  <textarea id="content" name="content" class="form-control" 
+                            rows="3" placeholder="学習した具体的な内容やメモを入力してください"></textarea>
+              </div>
+              <hr>
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 学習カテゴリと時間 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+               <label class="form-label">学習カテゴリと時間</label>
+                <div id="details-container">
+                    <div class="row mb-2 detail-row">
+                        <div class="col-md-6">
+                            <label class="form-label visually-hidden">カテゴリー</label>
+                            <select name="category_id[]" class="form-select form-select-sm" required>
+                                <option value="" disabled selected>カテゴリーを選択してください</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label visually-hidden">時間（分）</label>
+                            <input type="number" name="duration[]" class="form-control form-control-sm" 
+                                   placeholder="時間（分）" min="1" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger btn-sm remove-detail">削除</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 mb-4">
+                    <strong>合計時間: <span id="total-duration">0</span> 分</strong>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm mb-4" id="add-detail">+ 別のカテゴリーを追加</button>
+               <hr>
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 参照データ -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+               <h5 class="mb-3">参照データ</h5>
+               <div id="reference-container">
+                  <div class="card bg-light mb-3 reference-row">
+                      <div class="card-body">
+                          <div class="row g-2 mb-2">
+                              <div class="col-md-5">
+                                  <!-- nameを ref_title に統一 -->
+                                  <input type="text" name="ref_title" class="form-control form-control-sm" placeholder="参照資料タイトル">
+                              </div>
+                              <div class="col-md-5">
+                                  <!-- nameを ref_url に統一 -->
+                                  <input type="url" name="ref_url" class="form-control form-control-sm" placeholder="URL">
+                              </div>
+                              <div class="col-md-2 text-end">
+                                  <button type="button" class="btn btn-outline-danger btn-sm remove-reference">削除</button>
+                              </div>
+                          </div>
+                          <div class="row g-2">
+                              <div class="col-md-6">
+                                  <label class="form-label small mb-1">関連カテゴリ</label>
+                                  <!-- nameを ref_category_id に統一 -->
+                                  <select name="ref_category_id" class="form-select form-select-sm">
+                                      <option value="">選択してください</option>
+                                      {% for category in categories %}
+                                          <option value="{{ category.id }}">{{ category.name }}</option>
+                                      {% endfor %}
+                                  </select>
+                              </div>
+                              <div class="col-md-6">
+                                  <label class="form-label small mb-1">おすすめ度</label>
+                                  <!-- nameを ref_rating に統一 -->
+                                  <select name="ref_rating" class="form-select form-select-sm">
+                                      <option value="5">★★★★★</option>
+                                      <option value="4">★★★★☆</option>
+                                      <option value="3" selected>★★★☆☆</option>
+                                      <option value="2">★★☆☆☆</option>
+                                      <option value="1">★☆☆☆☆</option>
+                                  </select>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mb-4" id="add-reference">+ 参照データを追加</button>
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 記録を保存  -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary px-5">記録を保存</button>
+                </div>                
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/create_post.js') }}"></script>
+
+
+
+{% endblock %}
+<!--    ////////////////////////////////////////////////////////////////       -->
+
+

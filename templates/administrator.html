@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}管理者ページ{% endblock %}
+{% block content %}
+
+<div class="container">
+        <h1 class="h2 mt-4 mb-4"> 
+            <i class="bi bi-speedometer2 me-3 text-primary"></i>
+            管理者ページ
+        </h1>
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 新規ユーザー登録 / 削除 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<div class="card mb-4">
+    <div class="card-header text-primary fw-bold">ユーザー管理</div>
+    <div class="card-body">
+        <div class="row mb-4 align-items-center">
+            <div class="col-auto">
+                <span class="fw-bold me-3">新規ユーザー登録：</span>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <!-- メッセージ表示エリア -->
+                <div class="mt-4"> 
+                  {% for category, message in messages %}
+                    <!-- Bootstrapのアラートスタイルを使用 (category名は 'success' や 'error' を想定) -->
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" role="alert">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            <!-- ------------------------------------------------------------------------------------------------ -->
+            <!-- ----- 新規ユーザー登録 ------------------------------------------------------------------------- -->
+            <!-- ------------------------------------------------------------------------------------------------ -->
+            <div class="col-auto">
+                <form method="POST" action="/create_account" class="row gx-2 align-items-center">
+                    <div class="col-auto">
+                        <input type="text" name="add_user_name" class="form-control form-control-sm" placeholder="ユーザー名" required>
+                    </div>
+                    <div class="col-auto">
+                        <input type="password" name="add_user_pass" class="form-control form-control-sm" placeholder="パスワード" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">登録実行</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- ユーザー削除 ------------------------------------------------------------------------------ -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <hr> <!-- -区切り線 -->
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span class="fw-bold me-3 text-danger">ユーザー削除：</span>
+            </div>
+            <div class="col-auto">
+                <form action="/delete_account" method="POST" class="d-flex gap-2" onsubmit="return confirm('本当に削除しますか？');">
+                    <input type="text" name="del_user_name" class="form-control form-control-sm" placeholder="ユーザー名" style="width: 200px;" required>
+                    <button type="submit" class="btn btn-danger btn-sm">削除実行</button>
+                    <span class="text-warning small ms-2">
+                        ※投稿データを持つユーザーは削除できません
+                    </span>
+                </form>
+            </div>
+        </div>
+       <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- ユーザー一覧 ------------------------------------------------------------------------------ -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <hr> <!-- -区切り線 -->
+        <h4 class="mt-5 mb-3">登録ユーザー</h4>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ユーザー名</th>
+                    <th>管理者権限</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        {% if user.is_admin %}
+                            <span class="badge bg-primary">あり</span>
+                        {% else %}
+                            <span class="badge bg-secondary">なし</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3"><em>登録されているユーザーはいません。</em></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// 学習カテゴリー管理 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<div class="card mb-4">
+    <div class="card-header text-primary fw-bold d-flex justify-content-between align-items-center">
+        学習カテゴリー管理
+        <span class="badge bg-secondary">登録済み: {{ categories|length if categories else 0 }} 件</span>
+    </div>
+    <div class="card-body">
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- 新規登録 -------------------------------------------------------------------------------- -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <form method="POST" action="/create_category" class="row gx-2 mb-4 align-items-center">
+            <div class="col-auto">
+                <span class="fw-bold me-2">新規登録：</span>
+            </div>
+            <div class="col-auto">
+                <input type="text" name="category_name" class="form-control form-control-sm" style="width: 150px; placeholder="カテゴリー名を入力" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg"></i> 登録実行
+                </button>
+            </div>
+        </form>
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- カテゴリー一覧と削除 ---------------------------------------------------------------------- -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <hr> <!-- -区切り線 -->
+        <div class="row">
+            <div class="col-12">
+                <span class="fw-bold d-block mb-2">登録カテゴリ一覧：</span>
+                <span class="text-warning small">※投稿に使用中のカテゴリーは削除できません</span>
+                {% if categories %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%">ID</th>
+                                <th>カテゴリー名</th>
+                                <th style="width: 20%" class="text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in categories %}
+                            <tr>
+                                <td class="text-muted small">{{ category.id }}</td>
+                                <td><span class="badge bg-info text-dark">{{ category.name }}</span></td>
+                                <td class="text-center">
+                                    <form action="/delete_category" method="POST" onsubmit="return confirm('「{{ category.name }}」を削除しますか？\n※このカテゴリーに関連付けられた学習記録に影響が出る場合があります。');">
+                                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0">
+                                            <i class="bi bi-trash"></i> 削除
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light border text-center py-3">
+                    カテゴリーが登録されていません。
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<!-- ダミーデータ生成 -->
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header text-primary fw-bold">ダミーデータ生成</div>
+    <div class="card-body">
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- ダミーデータ生成1 --- ---------------------------------------------------------------------- -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <div class="row align-items-center mb-4">
+            <div class="col-lg-5">
+                <p class="card-text text-secondary mb-lg-0 mb-2">
+                    ここでは機能テスト用に以下のダミーデータを作成します<br>
+                     事前に、カテゴリーを4個以上登録して下さい<br>
+                    ①グラフ用データ(365日分)の自動生成<br>
+                    ②参考情報データ(31日分)の自動生成<br>
+                </p>
+            </div>
+            <div class="col-lg-7">
+                <form action="/dummy_data_gen" method="POST" class="row g-2 align-items-center">
+                    <div class="col-sm-4">
+                        <input type="text" name="user_name_dummy" class="form-control form-control-sm" placeholder="ユーザー名" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <select name="gen_data_pat" class="form-select form-select-sm">
+                            <option value="grp_dat_gen">グラフ用データ生成</option>
+                            <option value="ref_dat_gen">参考情報データ生成</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">実行</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr class="my-4"> <!-- 区切り線を適切に配置 -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <!-- ----- ダミーデータ生成2 --- ---------------------------------------------------------------------- -->
+        <!-- ------------------------------------------------------------------------------------------------ -->
+        <div class="row align-items-center border p-3 rounded">
+            <div class="col-lg-5">
+                <p class="card-text text-secondary mb-lg-0 mb-2">
+                    <strong>自動投稿システム</strong><br>
+                    指定ユーザーに対して1日1回、学習記録を自動生成します。<br>
+                    <!-- 実行状況のインジケーターを修正 -->
+                    <span class="badge {% if auto_post_status.get(target_user) %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if auto_post_status.get(target_user) %}● 動作中{% else %}○ 停止中{% endif %}
+                    </span>
+                </p>
+            </div>
+            <div class="col-lg-7">
+                <form action="/toggle_auto_post" method="POST" class="row g-2 align-items-center">
+                    <div class="col-sm-6"> 
+                        <!-- value="{{ target_user }}" を追加して、直前のユーザー名を入力欄に残す -->
+                        <input type="text" name="user_name_dummy" class="form-control form-control-sm" placeholder="ユーザー名" required value="{{ target_user }}">
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="submit" name="action" value="start" class="btn btn-primary btn-sm w-100">開始</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="submit" name="action" value="stop" class="btn btn-outline-danger btn-sm w-100">停止</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ------------------------------------------------------------------------------------------------ -->
+    </div>
+</div>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///// Flask-Admin案内 -->
+<!-- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<div class="card mb-4">
+    <div class="card-header text-primary fw-bold">「Flask-Admin」</div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col">
+                <p class="card-text text-secondary mb-0">
+                    Flask の拡張ライブラリである「Flask-Admin」を使用すると、データベースへのアクセスも簡易に行えるので試してみました。
+                    「Flask-Admin」の活用で、データベースの参照・追加・編集・削除（CRUD操作）を直感的なGUIから安全に行えます。
+                </p>
+            </div>
+            <div class="col-auto">
+                <a href="/admin/" class="btn btn-primary btn-sm">
+                    「Flask-Admin」
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="cdn.jsdelivr.net"></script>
+{% endblock %}
+

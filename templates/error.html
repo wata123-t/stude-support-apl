@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}エラーが発生しました{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">エラーが発生しました！</h4>
+                <p>{{ message }}</p>
+                <hr>
+                <p class="mb-0">ご迷惑をおかけして申し訳ありません。前のページに戻るか、<a href="/">ホームに戻る</a>。</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
